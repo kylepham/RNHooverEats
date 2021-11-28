@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "26063172720",
+    "firebase_url": "https://hoovereats-67e7a.firebaseio.com",
+    "project_id": "hoovereats-67e7a",
+    "storage_bucket": "hoovereats-67e7a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:26063172720:android:37eb26499610587cf8b0b5",
+        "android_client_info": {
+          "package_name": "edu.depauw.hoovereats"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "26063172720-rdr53at36ngq7q66n01p24n8f1e6k29a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzDdiFa3XkHy0tCdF-OuHNO10dzb6xR10"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "26063172720-rdr53at36ngq7q66n01p24n8f1e6k29a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "26063172720-cptrtn8p5stbrom6eoouorsc2e09g3nq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "edu.depauw.hoovereats"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

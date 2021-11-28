@@ -11,18 +11,19 @@ import {
 // -------------------------- COLORS
 
 export const mainColor = "#e4bb4a";
+export const darkColor = "#161512";
 
 // -------------------------- COMPONENTS
 
 interface TextProps {
   children: ReactChild | ReactChildren | ReactChild[] | ReactChildren[];
-  moreStyles?: StyleProp<TextStyle>;
+  style?: StyleProp<TextStyle>;
   [x: string]: any;
 }
 
-export const CustomText = ({ children, moreStyles, ...rest }: TextProps) => {
+export const CustomText = ({ children, style, ...rest }: TextProps) => {
   return (
-    <Text style={[{ color: "#fff" }, moreStyles]} {...rest}>
+    <Text style={[{ color: "#fff" }, style]} {...rest}>
       {children}
     </Text>
   );
@@ -31,15 +32,11 @@ export const CustomText = ({ children, moreStyles, ...rest }: TextProps) => {
 interface ButtonProps {
   children: ReactChild | ReactChildren | ReactChild[] | ReactChildren[];
   onPress: (e: GestureResponderEvent) => void;
-  moreStyles?: StyleProp<ViewStyle>;
+  style?: StyleProp<ViewStyle>;
   [x: string]: any;
 }
 
-export const CustomButton = ({
-  children,
-  moreStyles,
-  ...rest
-}: ButtonProps) => {
+export const CustomButton = ({ children, style, ...rest }: ButtonProps) => {
   return (
     <TouchableOpacity
       {...rest}
@@ -47,11 +44,10 @@ export const CustomButton = ({
       style={[
         {
           backgroundColor: mainColor,
-          alignSelf: "flex-start",
           padding: 10,
           borderRadius: 7,
         },
-        moreStyles,
+        style,
       ]}>
       <Text style={{ color: "#000", fontSize: 17 }}>{children}</Text>
     </TouchableOpacity>
