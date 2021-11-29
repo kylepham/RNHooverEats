@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Dimensions, StatusBar, StyleSheet } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { StatusBar, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import auth from "@react-native-firebase/auth";
+import { AuthContext } from "./contexts/AuthContext";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Feather from "react-native-vector-icons/Feather";
@@ -23,30 +24,28 @@ const Theme = {
   },
 };
 const App = () => {
+  const { userInfo, setUserInfo } = useContext(AuthContext);
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
-  const [userInfo, setUserInfo] = useState<FirebaseAuthTypes.User | null>(null);
 
   useEffect(() => {
     // get user login status
     (async () => {
-      await AsyncStorage.getItem("loggedIn").then(value => {
-        console.log(value);
-        if (value) {
-          value = JSON.parse(value);
-          if (value) setLoggedIn(true);
-        } else setLoggedIn(false);
-      });
+      let value = await AsyncStorage.getItem("uid");
+      if (value) {
+        value = JSON.parse(value);
+        if (value) setLoggedIn(true);
+      } else setLoggedIn(false);
     })();
 
     // firebase auth
     const subscriber = auth().onAuthStateChanged(async user => {
       if (user) {
-        await AsyncStorage.setItem("loggedIn", JSON.stringify(true));
+        await AsyncStorage.setItem("uid", JSON.stringify(user.uid));
         setLoggedIn(true);
-        setUserInfo(user);
+        setUserInfo!(user);
       } else {
         setLoggedIn(false);
-        setUserInfo(null);
+        setUserInfo!(null);
       }
     });
     return subscriber;
