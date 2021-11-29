@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Dimensions,
   SafeAreaView,
@@ -19,7 +19,7 @@ const Settings = () => {
         bounces={false}
         contentContainerStyle={[DefaultStyles.Container, styles.container]}>
         <CustomButton onPress={signOut} style={styles.signOutButton}>
-          <View style={{ marginRight: 40 }}>
+          <View style={{ marginRight: 10 }}>
             <AntDesign name="logout" size={20} color="black" />
           </View>
           Sign Out

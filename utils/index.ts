@@ -7,6 +7,107 @@ const baseURL = "https://twiki.csc.depauw.edu/api";
 
 // -------------------------- APIS
 
+export const postAuthInfo = async () => {
+  try {
+    await axios.post(
+      "https://twiki.csc.depauw.edu/api/auth",
+      {},
+      {
+        headers: {
+          authorization: await auth().currentUser!.getIdToken(),
+        },
+      },
+    );
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
+export const getAllConversations = async () => {
+  try {
+    return (
+      await axios.get(`https://twiki.csc.depauw.edu/api/conversations`, {
+        headers: {
+          authorization: await auth().currentUser!.getIdToken(),
+        },
+      })
+    ).data;
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
+export const getAllMessagesByConversationId = async (id: number) => {
+  try {
+    return (
+      await axios.get(`https://twiki.csc.depauw.edu/api/conversations/${id}`, {
+        headers: {
+          authorization: await auth().currentUser!.getIdToken(),
+        },
+      })
+    ).data;
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
+export const getProfile = async () => {
+  try {
+    return (
+      await axios.get("https://twiki.csc.depauw.edu/api/profile", {
+        headers: {
+          authorization: await auth().currentUser!.getIdToken(),
+        },
+      })
+    ).data;
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
+export const postUserInfo = async (userInfo: any) => {
+  await axios.post(
+    "https://twiki.csc.depauw.edu/api/profile/update",
+    userInfo,
+    {
+      headers: {
+        authorization: await auth().currentUser!.getIdToken(),
+      },
+    },
+  );
+};
+
+export const getMatchings = async () => {
+  try {
+    return (
+      await axios.get("https://twiki.csc.depauw.edu/api/matching", {
+        headers: {
+          authorization: await auth().currentUser!.getIdToken(),
+        },
+      })
+    ).data;
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
+export const getMatchingPreferencesData = async () => {
+  try {
+    return (
+      await axios.get(
+        "https://twiki.csc.depauw.edu/api/matching-preferences-data",
+        {
+          headers: {
+            authorization: await auth().currentUser!.getIdToken(),
+          },
+        },
+      )
+    ).data;
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
 export const getPreferences = async () => {
   try {
     await axios
@@ -35,5 +136,17 @@ export const signInWithGoogle = async () => {
 export const signOut = async () => {
   await auth().signOut();
   await GoogleSignin.signOut();
-  await AsyncStorage.removeItem("loggedIn");
+  await AsyncStorage.removeItem("uid");
+};
+
+export const getStorage = async (key: string) => {
+  try {
+    return JSON.parse((await AsyncStorage.getItem(key)) || "null");
+  } catch (e) {}
+};
+
+export const setStorage = async (key: string, value: any) => {
+  try {
+    await AsyncStorage.setItem(key, JSON.stringify(value));
+  } catch (e) {}
 };
