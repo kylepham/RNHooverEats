@@ -1,15 +1,8 @@
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import React from "react";
-import {
-  Dimensions,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, SafeAreaView, ScrollView, StyleSheet } from "react-native";
 import { DefaultStyles } from "../App";
-import { CustomButton, CustomText } from "../styles";
+import { CustomText } from "../utils/components";
 
 const Home = () => {
   const tabBarHeight = useBottomTabBarHeight();
@@ -18,15 +11,8 @@ const Home = () => {
     <SafeAreaView style={DefaultStyles.Container}>
       <ScrollView
         bounces={false}
-        contentContainerStyle={[
-          DefaultStyles.Container,
-          styles.container,
-          { paddingBottom: tabBarHeight },
-        ]}>
+        contentContainerStyle={[DefaultStyles.Container, styles.container, { paddingBottom: tabBarHeight }]}>
         <CustomText>Hello Home</CustomText>
-        <CustomButton onPress={e => console.log(e.nativeEvent)}>
-          Test
-        </CustomButton>
       </ScrollView>
     </SafeAreaView>
   );

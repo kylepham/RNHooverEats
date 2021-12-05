@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Image, StatusBar, StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "@react-native-firebase/auth";
 import { AuthContext } from "./contexts/AuthContext";
@@ -12,11 +12,11 @@ import { ConversationInterface, RootStackParamList } from "./utils/interfaces";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Feather from "react-native-vector-icons/Feather";
-import { darkColor, mainColor } from "./styles";
+import { darkColor, mainColor } from "./utils/components";
 import Home from "./screens/Home";
 import Conversations from "./screens/Conversations";
 import Chat from "./screens/Chat";
-import Settings from "./screens/Settings";
+import Profile from "./screens/Profile";
 import Login from "./screens/Login";
 import Loading from "./screens/Loading";
 
@@ -27,17 +27,37 @@ const TabNavigation = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarShowLabel: false,
+        headerShown: true,
+        headerTitle: () => (
+          <Text
+            style={{
+              fontWeight: "bold",
+              fontSize: 16,
+              textTransform: "uppercase",
+              color: mainColor,
+            }}>
+            {route.name}
+          </Text>
+        ),
+        headerShadowVisible: false,
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: darkColor,
+        },
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          marginBottom: 3,
+          fontSize: 12,
+          fontWeight: "bold",
+        },
+        tabBarActiveTintColor: mainColor,
         tabBarIcon: ({ focused }) => {
           switch (route.name) {
             case "Home":
               return <Feather name="home" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
             case "Conversations":
-              return (
-                <MaterialIcons name="messenger-outline" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />
-              );
-            case "Settings":
+              return <MaterialIcons name="messenger-outline" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
+            case "Profile":
               return <AntDesign name="user" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
           }
         },
@@ -46,38 +66,13 @@ const TabNavigation = () => {
         },
       })}>
       <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen
-        name="Conversations"
-        component={Conversations}
-        options={{
-          headerShown: true,
-          headerTitle: () => (
-            <Text
-              style={{
-                fontWeight: "bold",
-                fontSize: 16,
-                textTransform: "uppercase",
-                color: mainColor,
-              }}>
-              Conversations
-            </Text>
-          ),
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-          headerStyle: {
-            backgroundColor: darkColor,
-          },
-        }}
-      />
-      <Tab.Screen name="Settings" component={Settings} />
+      <Tab.Screen name="Conversations" component={Conversations} />
+      <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );
 };
 
-const ChatHeader: React.FC<{ recipientPhotoUrl: string; recipientName: string }> = ({
-  recipientPhotoUrl,
-  recipientName,
-}) => {
+const ChatHeader: React.FC<{ recipientPhotoUrl: string; recipientName: string }> = ({ recipientPhotoUrl, recipientName }) => {
   return (
     <View
       style={{
@@ -115,7 +110,7 @@ const App = () => {
     })();
 
     // firebase auth
-    const subscriber = auth().onAuthStateChanged(async user => {
+    return auth().onAuthStateChanged(async user => {
       if (user) {
         await AsyncStorage.setItem("uid", JSON.stringify(user.uid));
         setConversations!(
@@ -129,7 +124,6 @@ const App = () => {
         setUserInfo!(null);
       }
     });
-    return subscriber;
   }, []);
 
   useEffect(() => {
@@ -137,7 +131,7 @@ const App = () => {
   }, [userInfo, socketConnected]);
 
   if (loggedIn === null) return <Loading />;
-  if (loggedIn === false) return <Login />;
+  if (!loggedIn) return <Login />;
 
   return (
     <NavigationContainer theme={Theme}>
@@ -151,12 +145,7 @@ const App = () => {
             title: route.params.recipientName,
             headerStyle: { backgroundColor: darkColor },
             headerTintColor: mainColor,
-            headerTitle: () => (
-              <ChatHeader
-                recipientPhotoUrl={route.params.recipientPhotoUrl}
-                recipientName={route.params.recipientName}
-              />
-            ),
+            headerTitle: () => <ChatHeader recipientPhotoUrl={route.params.recipientPhotoUrl} recipientName={route.params.recipientName} />,
             headerBackTitle: undefined,
           })}
         />
