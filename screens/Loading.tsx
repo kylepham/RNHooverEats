@@ -3,8 +3,8 @@ import { StyleSheet, Text, View } from "react-native";
 
 const Loading = () => {
   return (
-    <View>
-      <Text></Text>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ color: "white" }}>Loading...</Text>
     </View>
   );
 };
