@@ -1,21 +1,96 @@
 import React, { useContext, useEffect, useState } from "react";
-import { StatusBar, StyleSheet } from "react-native";
+import { Image, StatusBar, StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "@react-native-firebase/auth";
 import { AuthContext } from "./contexts/AuthContext";
+import { SocketContext } from "./contexts/SocketContext";
+import { getAllConversations, getProfile } from "./utils";
+import { ConversationInterface, RootStackParamList } from "./utils/interfaces";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Feather from "react-native-vector-icons/Feather";
-import { darkColor } from "./styles";
+import { darkColor, mainColor } from "./styles";
 import Home from "./screens/Home";
+import Conversations from "./screens/Conversations";
 import Chat from "./screens/Chat";
 import Settings from "./screens/Settings";
 import Login from "./screens/Login";
 import Loading from "./screens/Loading";
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const TabNavigation = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarIcon: ({ focused }) => {
+          switch (route.name) {
+            case "Home":
+              return <Feather name="home" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
+            case "Conversations":
+              return (
+                <MaterialIcons name="messenger-outline" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />
+              );
+            case "Settings":
+              return <AntDesign name="user" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
+          }
+        },
+        tabBarStyle: {
+          backgroundColor: "black",
+        },
+      })}>
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen
+        name="Conversations"
+        component={Conversations}
+        options={{
+          headerShown: true,
+          headerTitle: () => (
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 16,
+                textTransform: "uppercase",
+                color: mainColor,
+              }}>
+              Conversations
+            </Text>
+          ),
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+          headerStyle: {
+            backgroundColor: darkColor,
+          },
+        }}
+      />
+      <Tab.Screen name="Settings" component={Settings} />
+    </Tab.Navigator>
+  );
+};
+
+const ChatHeader: React.FC<{ recipientPhotoUrl: string; recipientName: string }> = ({
+  recipientPhotoUrl,
+  recipientName,
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        width: "100%",
+      }}>
+      <Image source={{ uri: recipientPhotoUrl }} style={{ width: 35, height: 35, borderRadius: 40 }} />
+      <Text style={{ color: "#fff", marginLeft: 20, fontWeight: "bold" }}>{recipientName}</Text>
+    </View>
+  );
+};
+
 const Theme = {
   ...DefaultTheme,
   colors: {
@@ -23,8 +98,10 @@ const Theme = {
     background: darkColor,
   },
 };
+
 const App = () => {
   const { userInfo, setUserInfo } = useContext(AuthContext);
+  const { setConversations, socketConnected } = useContext(SocketContext);
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -33,16 +110,20 @@ const App = () => {
       let value = await AsyncStorage.getItem("uid");
       if (value) {
         value = JSON.parse(value);
-        if (value) setLoggedIn(true);
-      } else setLoggedIn(false);
+        if (!value) setLoggedIn(false);
+      }
     })();
 
     // firebase auth
     const subscriber = auth().onAuthStateChanged(async user => {
       if (user) {
         await AsyncStorage.setItem("uid", JSON.stringify(user.uid));
-        setLoggedIn(true);
-        setUserInfo!(user);
+        setConversations!(
+          (await getAllConversations()).sort((prev: ConversationInterface, next: ConversationInterface) => {
+            return next.timestamp - prev.timestamp;
+          }),
+        );
+        setUserInfo!(await getProfile());
       } else {
         setLoggedIn(false);
         setUserInfo!(null);
@@ -51,7 +132,9 @@ const App = () => {
     return subscriber;
   }, []);
 
-  console.log(userInfo);
+  useEffect(() => {
+    if (userInfo && socketConnected) setLoggedIn(true);
+  }, [userInfo, socketConnected]);
 
   if (loggedIn === null) return <Loading />;
   if (loggedIn === false) return <Login />;
@@ -59,46 +142,25 @@ const App = () => {
   return (
     <NavigationContainer theme={Theme}>
       <StatusBar barStyle={"light-content"} />
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarShowLabel: false,
-          tabBarIcon: ({ focused }) => {
-            switch (route.name) {
-              case "Home":
-                return (
-                  <Feather
-                    name="home"
-                    size={25}
-                    color={`${focused ? "#e4bb4a" : "#fffbf57f"}`}
-                  />
-                );
-              case "Chat":
-                return (
-                  <MaterialIcons
-                    name="messenger-outline"
-                    size={25}
-                    color={`${focused ? "#e4bb4a" : "#fffbf57f"}`}
-                  />
-                );
-              case "Settings":
-                return (
-                  <AntDesign
-                    name="user"
-                    size={25}
-                    color={`${focused ? "#e4bb4a" : "#fffbf57f"}`}
-                  />
-                );
-            }
-          },
-          tabBarStyle: {
-            backgroundColor: "black",
-          },
-        })}>
-        <Tab.Screen name="Home" component={Home} />
-        <Tab.Screen name="Chat" component={Chat} />
-        <Tab.Screen name="Settings" component={Settings} />
-      </Tab.Navigator>
+      <Stack.Navigator>
+        <Stack.Screen name="TabNavigation" component={TabNavigation} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
+          options={({ route }) => ({
+            title: route.params.recipientName,
+            headerStyle: { backgroundColor: darkColor },
+            headerTintColor: mainColor,
+            headerTitle: () => (
+              <ChatHeader
+                recipientPhotoUrl={route.params.recipientPhotoUrl}
+                recipientName={route.params.recipientName}
+              />
+            ),
+            headerBackTitle: undefined,
+          })}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
