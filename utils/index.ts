@@ -65,16 +65,26 @@ export const getProfile = async () => {
   }
 };
 
+export const getOptionsInfo = async () => {
+  try {
+    return (
+        await axios.get("https://twiki.csc.depauw.edu/api/options-info")
+    ).data;
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
 export const postUserInfo = async (userInfo: any) => {
-  await axios.post(
+  return (await axios.post(
     "https://twiki.csc.depauw.edu/api/profile/update",
     userInfo,
     {
       headers: {
         authorization: await auth().currentUser!.getIdToken(),
       },
-    },
-  );
+    }
+  ));
 };
 
 export const getMatchings = async () => {

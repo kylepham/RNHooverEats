@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SocketContext } from "../contexts/SocketContext";
 import { DefaultStyles } from "../App";
-import { CustomText } from "../styles";
+import { CustomText } from "../utils/components";
 import { getAllMessagesByConversationId } from "../utils";
 import { useNavigation } from "@react-navigation/core";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";

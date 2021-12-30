@@ -3,7 +3,6 @@ import {
   Dimensions,
   Image,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -13,7 +12,7 @@ import {
 import { DefaultStyles } from "../App";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { signInWithGoogle } from "../utils";
-import { darkColor } from "../styles";
+import { darkColor } from "../utils/components";
 
 const Login = () => {
   return (

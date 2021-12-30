@@ -1,5 +1,5 @@
-import React, { createRef, useContext, useEffect, useRef, useState } from "react";
-import { Dimensions, StyleSheet, Text, TextProps, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { Dimensions, StyleSheet } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 import {
   Composer,
@@ -22,7 +22,7 @@ import { SocketContext } from "../contexts/SocketContext";
 import { RootStackParamList } from "../utils/interfaces";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import { darkColor, mainColor } from "../styles";
+import { darkColor, mainColor } from "../utils/components";
 
 const Chat = () => {
   const route = useRoute<RouteProp<RootStackParamList>>();
@@ -81,14 +81,14 @@ const Chat = () => {
   const renderInputToolbar = (props: InputToolbarProps) => (
     <InputToolbar
       {...props}
-      containerStyle={{
+    containerStyle={{
         backgroundColor: darkColor,
         borderTopWidth: 0,
-      }}
-      primaryStyle={{
+    }}
+    primaryStyle={{
         display: "flex",
         alignItems: "center",
-      }}></InputToolbar>
+    }}/>
   );
 
   const renderComposer = (props: ComposerProps) => (
