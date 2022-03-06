@@ -51,7 +51,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
   // initiate websocket
   useEffect(() => {
-    if (!userInfo) return;
+    if (!Object.keys(userInfo).length) return;
 
     if (!client) {
       let helper = new Client({
@@ -121,7 +121,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 conversation.lastSenderName = senderName;
               }
 
-              console.log(conversation);
               return [...conversations!.sort((prev, next) => next.timestamp - prev.timestamp)];
             });
           });

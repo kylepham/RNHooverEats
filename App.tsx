@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Image, StatusBar, StyleSheet, Text, View } from "react-native";
+import { StatusBar, StyleSheet, Text } from "react-native";
+import "react-native-reanimated";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
@@ -7,13 +8,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "@react-native-firebase/auth";
 import { AuthContext } from "./contexts/AuthContext";
 import { SocketContext } from "./contexts/SocketContext";
-import { getAllConversations, getProfile } from "./utils";
+import { getAllConversations, getOptionsInfo, getProfile, postAuthInfo } from "./utils";
 import { ConversationInterface, RootStackParamList } from "./utils/interfaces";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Feather from "react-native-vector-icons/Feather";
 import { darkColor, mainColor } from "./utils/components";
 import Home from "./screens/Home";
+import Filter from "./screens/Filter";
 import Conversations from "./screens/Conversations";
 import Chat from "./screens/Chat";
 import Profile from "./screens/Profile";
@@ -22,6 +24,43 @@ import Loading from "./screens/Loading";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const Theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: darkColor,
+  },
+};
+
+const HomeNavigation = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={({ route }) => ({
+        headerTitle: () => (
+          <Text
+            style={{
+              fontWeight: "bold",
+              fontSize: 16,
+              textTransform: "uppercase",
+              color: mainColor,
+            }}>
+            {route.name}
+          </Text>
+        ),
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: darkColor,
+        },
+        headerBackTitleVisible: false,
+        headerTintColor: mainColor,
+        headerShadowVisible: false,
+      })}>
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Filter" component={Filter} />
+    </Stack.Navigator>
+  );
+};
 
 const TabNavigation = () => {
   return (
@@ -53,10 +92,12 @@ const TabNavigation = () => {
         tabBarActiveTintColor: mainColor,
         tabBarIcon: ({ focused }) => {
           switch (route.name) {
-            case "Home":
+            case "HomeNavigation":
               return <Feather name="home" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
             case "Conversations":
-              return <MaterialIcons name="messenger-outline" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
+              return (
+                <MaterialIcons name="messenger-outline" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />
+              );
             case "Profile":
               return <AntDesign name="user" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
           }
@@ -65,37 +106,15 @@ const TabNavigation = () => {
           backgroundColor: "black",
         },
       })}>
-      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="HomeNavigation" component={HomeNavigation} options={{ headerShown: false, title: "Home" }} />
       <Tab.Screen name="Conversations" component={Conversations} />
       <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );
 };
 
-const ChatHeader: React.FC<{ recipientPhotoUrl: string; recipientName: string }> = ({ recipientPhotoUrl, recipientName }) => {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        width: "100%",
-      }}>
-      <Image source={{ uri: recipientPhotoUrl }} style={{ width: 35, height: 35, borderRadius: 40 }} />
-      <Text style={{ color: "#fff", marginLeft: 20, fontWeight: "bold" }}>{recipientName}</Text>
-    </View>
-  );
-};
-
-const Theme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: darkColor,
-  },
-};
-
 const App = () => {
-  const { userInfo, setUserInfo } = useContext(AuthContext);
+  const { userInfo, setUserInfo, setOptionsInfo } = useContext(AuthContext);
   const { setConversations, socketConnected } = useContext(SocketContext);
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
 
@@ -118,16 +137,20 @@ const App = () => {
             return next.timestamp - prev.timestamp;
           }),
         );
-        setUserInfo!(await getProfile());
+        postAuthInfo().then(async () => {
+          setUserInfo!(await getProfile());
+        });
+        setOptionsInfo!(await getOptionsInfo());
       } else {
         setLoggedIn(false);
-        setUserInfo!(null);
+        setUserInfo!({});
+        setOptionsInfo!({});
       }
     });
   }, []);
 
   useEffect(() => {
-    if (userInfo && socketConnected) setLoggedIn(true);
+    if (Object.keys(userInfo) && socketConnected) setLoggedIn(true);
   }, [userInfo, socketConnected]);
 
   if (loggedIn === null) return <Loading />;
@@ -138,17 +161,7 @@ const App = () => {
       <StatusBar barStyle={"light-content"} />
       <Stack.Navigator>
         <Stack.Screen name="TabNavigation" component={TabNavigation} options={{ headerShown: false }} />
-        <Stack.Screen
-          name="Chat"
-          component={Chat}
-          options={({ route }) => ({
-            title: route.params.recipientName,
-            headerStyle: { backgroundColor: darkColor },
-            headerTintColor: mainColor,
-            headerTitle: () => <ChatHeader recipientPhotoUrl={route.params.recipientPhotoUrl} recipientName={route.params.recipientName} />,
-            headerBackTitle: undefined,
-          })}
-        />
+        <Stack.Screen name="Chat" component={Chat} />
       </Stack.Navigator>
     </NavigationContainer>
   );

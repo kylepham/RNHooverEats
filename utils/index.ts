@@ -23,6 +23,14 @@ export const postAuthInfo = async () => {
   }
 };
 
+export const postFilterGetMatching = async userInfo => {
+  return await axios.post("https://twiki.csc.depauw.edu/api/matching", userInfo, {
+    headers: {
+      authorization: await auth().currentUser!.getIdToken(),
+    },
+  });
+};
+
 export const getAllConversations = async () => {
   try {
     return (
@@ -67,24 +75,18 @@ export const getProfile = async () => {
 
 export const getOptionsInfo = async () => {
   try {
-    return (
-        await axios.get("https://twiki.csc.depauw.edu/api/options-info")
-    ).data;
+    return (await axios.get("https://twiki.csc.depauw.edu/api/options-info")).data;
   } catch (e) {
     console.warn(e);
   }
-}
+};
 
 export const postUserInfo = async (userInfo: any) => {
-  return (await axios.post(
-    "https://twiki.csc.depauw.edu/api/profile/update",
-    userInfo,
-    {
-      headers: {
-        authorization: await auth().currentUser!.getIdToken(),
-      },
-    }
-  ));
+  return await axios.post("https://twiki.csc.depauw.edu/api/profile/update", userInfo, {
+    headers: {
+      authorization: await auth().currentUser!.getIdToken(),
+    },
+  });
 };
 
 export const getMatchings = async () => {
@@ -104,14 +106,11 @@ export const getMatchings = async () => {
 export const getMatchingPreferencesData = async () => {
   try {
     return (
-      await axios.get(
-        "https://twiki.csc.depauw.edu/api/matching-preferences-data",
-        {
-          headers: {
-            authorization: await auth().currentUser!.getIdToken(),
-          },
+      await axios.get("https://twiki.csc.depauw.edu/api/matching-preferences-data", {
+        headers: {
+          authorization: await auth().currentUser!.getIdToken(),
         },
-      )
+      })
     ).data;
   } catch (e) {
     console.warn(e);
@@ -120,11 +119,9 @@ export const getMatchingPreferencesData = async () => {
 
 export const getPreferences = async () => {
   try {
-    await axios
-      .get(`${baseURL}/matching-preferences-data?debug=1`)
-      .then(result => {
-        console.log(result.data);
-      });
+    await axios.get(`${baseURL}/matching-preferences-data?debug=1`).then(result => {
+      console.log(result.data);
+    });
   } catch (e) {
     console.warn(e);
   }
