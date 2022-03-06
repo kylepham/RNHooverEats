@@ -6,6 +6,17 @@ export type RootStackParamList = {
     recipientPhotoUrl: string;
     conversationId: number;
   };
+  Home: {
+    newUserInfo?: UserInfo;
+  };
+  Filter: {
+    prefMajors: string[];
+    prefClasses: string[];
+    prefGreek: string[];
+    prefPrograms: string[];
+    prefHobbies: string[];
+    type: string;
+  };
 };
 
 export interface ConversationInterface {
@@ -29,4 +40,41 @@ export interface MessageInterface {
   content: string;
   timestamp: number;
   conversationId: number;
+}
+
+export interface UserInfo {
+  bio?: string;
+  classes?: string[];
+  email?: string;
+  gradYear?: number;
+  greek?: string[];
+  hobbies?: string[];
+  majors?: string[];
+  name?: string;
+  photoUrl?: string;
+  prefClasses?: string[];
+  prefGreek?: string[];
+  prefHobbies?: string[];
+  prefMajors?: string[];
+  prefPrograms?: string[];
+  priorities?: {
+    classes?: number;
+    greek?: number;
+    hobbies?: number;
+    majors?: number;
+    programs?: number;
+  };
+  programs?: string[];
+  type?: string;
+  uid?: string;
+  username?: string;
+}
+
+export interface OptionsInfo {
+  classes?: string[];
+  majors?: string[];
+  greek?: string[];
+  hobbies?: string[];
+  programs?: string[];
+  type?: string[];
 }

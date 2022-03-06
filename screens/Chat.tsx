@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, View } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 import {
   Composer,
@@ -17,16 +17,18 @@ import {
   MessageTextProps,
   MessageText,
 } from "react-native-gifted-chat";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { SocketContext } from "../contexts/SocketContext";
 import { RootStackParamList } from "../utils/interfaces";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { darkColor, mainColor } from "../utils/components";
 
 const Chat = () => {
-  const route = useRoute<RouteProp<RootStackParamList>>();
-  const { recipientUid, conversationId } = route.params!;
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Chat">>();
+  const route = useRoute<RouteProp<RootStackParamList, "Chat">>();
+
   const { userInfo } = useContext(AuthContext);
   const { client, conversationDict } = useContext(SocketContext);
   const [currentMessages, setCurrentMessages] = useState<IMessage[] | undefined>(undefined);
@@ -34,7 +36,7 @@ const Chat = () => {
 
   useEffect(() => {
     setCurrentMessages(
-      conversationDict[conversationId]
+      conversationDict[route.params.conversationId]
         .map(message => {
           return {
             _id: message.id,
@@ -58,12 +60,32 @@ const Chat = () => {
     );
   }, [conversationDict]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+          }}>
+          <Image source={{ uri: route.params.recipientPhotoUrl }} style={{ width: 35, height: 35, borderRadius: 40 }} />
+          <Text style={{ color: "#fff", marginLeft: 20, fontWeight: "bold" }}>{route.params.recipientName}</Text>
+        </View>
+      ),
+      title: route.params.recipientName,
+      headerStyle: { backgroundColor: darkColor },
+      headerTintColor: mainColor,
+      headerBackTitleVisible: false,
+    });
+  }, []);
+
   const sendMessage = ([{ text }]: IMessage[]) => {
     if (!text) return;
 
     const message = {
       senderUid: userInfo!.uid,
-      recipientUid,
+      recipientUid: route.params.recipientUid,
       content: text,
       timestamp: new Date().getTime(),
     };
@@ -81,14 +103,15 @@ const Chat = () => {
   const renderInputToolbar = (props: InputToolbarProps) => (
     <InputToolbar
       {...props}
-    containerStyle={{
+      containerStyle={{
         backgroundColor: darkColor,
         borderTopWidth: 0,
-    }}
-    primaryStyle={{
+      }}
+      primaryStyle={{
         display: "flex",
         alignItems: "center",
-    }}/>
+      }}
+    />
   );
 
   const renderComposer = (props: ComposerProps) => (

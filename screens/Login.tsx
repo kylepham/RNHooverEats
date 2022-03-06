@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Dimensions,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Dimensions, Image, SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DefaultStyles } from "../App";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { signInWithGoogle } from "../utils";
@@ -19,21 +10,9 @@ const Login = () => {
     <View style={[DefaultStyles.Container]}>
       <StatusBar backgroundColor={darkColor} barStyle="light-content" />
       <SafeAreaView style={[DefaultStyles.Container, styles.container]}>
-        <Image
-          source={require("../assets/logo.png")}
-          style={styles.appLogo}
-          resizeMethod="resize"
-        />
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={styles.loginButton}
-          onPress={signInWithGoogle}>
-          <AntDesign
-            name="google"
-            color={TEXT_COLOR}
-            size={height / 25}
-            style={styles.loginButtonIcon}
-          />
+        <Image source={require("../assets/logo.png")} style={styles.appLogo} resizeMethod="resize" />
+        <TouchableOpacity activeOpacity={0.8} style={styles.loginButton} onPress={signInWithGoogle}>
+          <AntDesign name="google" color={TEXT_COLOR} size={height / 25} style={styles.loginButtonIcon} />
           <Text style={styles.loginButtonText}>Login with Google</Text>
         </TouchableOpacity>
       </SafeAreaView>

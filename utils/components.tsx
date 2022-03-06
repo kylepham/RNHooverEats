@@ -7,14 +7,15 @@ export const darkColor = "#161512";
 
 import React, { ReactChild, ReactChildren } from "react";
 import {
-    GestureResponderEvent,
-    Keyboard,
-    StyleProp,
-    Text,
-    TextStyle,
-    TouchableOpacity,
-    TouchableWithoutFeedback, View,
-    ViewStyle,
+  GestureResponderEvent,
+  Keyboard,
+  StyleProp,
+  Text,
+  TextStyle,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+  ViewStyle,
 } from "react-native";
 
 /// TEXTS
@@ -41,7 +42,7 @@ export const SolidTextBox = ({ children, style, ...rest }: TextProps) => {
           borderRadius: 15,
           paddingHorizontal: 10,
           paddingVertical: 5,
-          margin: 2
+          margin: 2,
         },
         style,
       ]}
@@ -73,7 +74,7 @@ export const CustomButton = ({ children, style, ...rest }: ButtonProps) => {
         },
         style,
       ]}>
-        {children}
+      {children}
     </TouchableOpacity>
   );
 };
@@ -82,8 +83,4 @@ export const HideKeyboard = ({
   children,
 }: {
   children: ReactChild | ReactChildren | ReactChild[] | ReactChildren[];
-}) => (
-  <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-    {children}
-  </TouchableWithoutFeedback>
-);
+}) => <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>{children}</TouchableWithoutFeedback>;

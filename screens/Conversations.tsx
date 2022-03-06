@@ -48,6 +48,7 @@ const Conversation = ({ conversation, ...rest }: ConversationProps) => {
 
 const Conversations = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const { conversationDict, setConversationDict, conversations } = useContext(SocketContext);
 
   const onConversationPress = async (conversation: ConversationInterface) => {
@@ -73,9 +74,6 @@ const Conversations = () => {
       });
     }
   };
-
-  console.log("conversations:", conversations);
-  console.log("convo dict:", conversationDict);
 
   return (
     <SafeAreaView style={DefaultStyles.Container}>
