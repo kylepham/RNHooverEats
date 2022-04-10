@@ -2,6 +2,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserInfo } from "./interfaces";
 
 const baseURL = "https://twiki.csc.depauw.edu/api";
 
@@ -23,7 +24,7 @@ export const postAuthInfo = async () => {
   }
 };
 
-export const postFilterGetMatching = async userInfo => {
+export const postFilterGetMatching = async (userInfo: UserInfo) => {
   return await axios.post("https://twiki.csc.depauw.edu/api/matching", userInfo, {
     headers: {
       authorization: await auth().currentUser!.getIdToken(),

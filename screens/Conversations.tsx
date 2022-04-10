@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SocketContext } from "../contexts/SocketContext";
 import { DefaultStyles } from "../App";
@@ -7,6 +7,7 @@ import { getAllMessagesByConversationId } from "../utils";
 import { useNavigation } from "@react-navigation/core";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ConversationInterface, RootStackParamList } from "../utils/interfaces";
+import HeaderTitle from "../components/HeaderTitle";
 
 interface ConversationProps {
   conversation: ConversationInterface;
@@ -74,6 +75,10 @@ const Conversations = () => {
       });
     }
   };
+
+  useEffect(() => {
+    navigation.setOptions({ headerTitle: () => <HeaderTitle name="Conversations" /> });
+  }, []);
 
   return (
     <SafeAreaView style={DefaultStyles.Container}>
