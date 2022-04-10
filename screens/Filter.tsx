@@ -1,105 +1,18 @@
-import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { MotiScrollView, motify, AnimatePresence } from "moti";
 import { AuthContext } from "../contexts/AuthContext";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../utils/interfaces";
 import { DefaultStyles } from "../App";
-import { CustomText, darkColor, mainColor } from "../utils/components";
-import AntDesign from "react-native-vector-icons/AntDesign";
-
-interface CategoryProps {
-  category: string;
-  list: string[];
-  accordionData: string[];
-  setAccordionData: Dispatch<SetStateAction<string[]>>;
-  openingAccordion: string;
-  setOpeningAccordion: Dispatch<SetStateAction<string>>;
-}
-
-const MotifiedAntDesign = motify(AntDesign)();
-
-const Accordion = ({
-  category,
-  list,
-  accordionData,
-  setAccordionData,
-  openingAccordion,
-  setOpeningAccordion,
-}: CategoryProps) => {
-  const onAccordionPress = () => {
-    if (openingAccordion === category) setOpeningAccordion("");
-    else setOpeningAccordion(category);
-  };
-
-  const onItemPress = (choiceName: string) => {
-    if (accordionData.includes(choiceName)) {
-      setAccordionData(accordionData.filter(data => data != choiceName));
-    } else setAccordionData([...accordionData, choiceName]);
-  };
-
-  return (
-    <View style={styles.accordionContainer}>
-      <TouchableOpacity activeOpacity={0.8} style={styles.accordionHeader} onPress={onAccordionPress}>
-        <View style={styles.accordionHeaderLeft}>
-          <CustomText style={{ fontSize: 17, color: "#000" }}>{category} · </CustomText>
-          <CustomText style={{ color: "#000" }}>{accordionData.length} selected</CustomText>
-        </View>
-        <MotifiedAntDesign
-          from={{ rotateZ: openingAccordion === category ? "90deg" : "0deg" }}
-          transition={{ type: "timing", duration: 400 }}
-          name="rightcircleo"
-          size={20}
-          color="#000"
-        />
-      </TouchableOpacity>
-
-      <AnimatePresence>
-        {openingAccordion === category && (
-          <MotiScrollView
-            from={{ maxHeight: 0 }}
-            animate={{ maxHeight: height / 2 }}
-            transition={{ type: "timing", duration: 400 }}
-            exit={{ maxHeight: 0 }}
-            bounces={false}
-            nestedScrollEnabled={true}
-            style={styles.accordionBody}>
-            {list.map(choiceName => {
-              const chosen = accordionData.includes(choiceName);
-
-              return (
-                <TouchableOpacity
-                  key={choiceName}
-                  activeOpacity={0.8}
-                  style={styles.accordionBodyItemContainer}
-                  onPress={() => {
-                    onItemPress(choiceName);
-                  }}>
-                  <CustomText
-                    key={choiceName}
-                    style={{
-                      flexShrink: 1,
-                      paddingRight: 10,
-                      textTransform: "uppercase",
-                      color: chosen ? mainColor : "white",
-                    }}>
-                    {choiceName}
-                  </CustomText>
-                  <AntDesign name="check" size={30} color={chosen ? mainColor : darkColor} />
-                </TouchableOpacity>
-              );
-            })}
-          </MotiScrollView>
-        )}
-      </AnimatePresence>
-    </View>
-  );
-};
+import { CustomText, mainColor } from "../utils/components";
+import Accordion from "../components/Accordion";
+import HeaderTitle from "../components/HeaderTitle";
 
 const Filter = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Filter">>();
   const route = useRoute<RouteProp<RootStackParamList, "Filter">>();
+
   const { userInfo, optionsInfo } = useContext(AuthContext);
   const [openingAccordionCategory, setOpeningAccordionCategory] = useState<string>("");
   const [prefClasses, setPrefClasses] = useState<string[]>(route.params.prefClasses);
@@ -123,13 +36,16 @@ const Filter = () => {
   };
 
   useEffect(() => {
+    navigation.setOptions({ headerTitle: () => <HeaderTitle name="Filter" /> });
+  }, []);
+
+  useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity activeOpacity={0.8} onPress={onApplyPress}>
           <CustomText
             style={{
-              fontSize: 16,
-              textTransform: "uppercase",
+              textTransform: "capitalize",
               color: mainColor,
             }}>
             Apply
@@ -146,15 +62,15 @@ const Filter = () => {
           {optionsInfo.type!.map(userType => {
             return (
               <TouchableOpacity activeOpacity={0.8} key={userType} onPress={() => setType(userType)}>
-                <Text
-                  style={{
-                    color: "#000",
-                    backgroundColor: userType === type ? mainColor : "#444444",
-                    padding: 10,
-                    borderRadius: 10,
-                  }}>
-                  {userType}
-                </Text>
+                <View
+                  style={{ backgroundColor: userType === type ? mainColor : "#444444", padding: 10, borderRadius: 10 }}>
+                  <Text
+                    style={{
+                      color: "#000",
+                    }}>
+                    {userType}
+                  </Text>
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -163,15 +79,16 @@ const Filter = () => {
           <React.Fragment>
             <Accordion
               category="Majors"
-              list={optionsInfo.majors!}
+              optionsKey="majors"
               accordionData={prefMajors}
               setAccordionData={setPrefMajors}
               openingAccordion={openingAccordionCategory}
               setOpeningAccordion={setOpeningAccordionCategory}
+              first
             />
             <Accordion
               category="Classes"
-              list={optionsInfo.classes!}
+              optionsKey="classes"
               accordionData={prefClasses}
               setAccordionData={setPrefClasses}
               openingAccordion={openingAccordionCategory}
@@ -179,7 +96,7 @@ const Filter = () => {
             />
             <Accordion
               category="Greek"
-              list={optionsInfo.greek!}
+              optionsKey="greek"
               accordionData={prefGreek}
               setAccordionData={setPrefGreek}
               openingAccordion={openingAccordionCategory}
@@ -187,7 +104,7 @@ const Filter = () => {
             />
             <Accordion
               category="Programs"
-              list={optionsInfo.programs!}
+              optionsKey="programs"
               accordionData={prefPrograms}
               setAccordionData={setPrefPrograms}
               openingAccordion={openingAccordionCategory}
@@ -195,7 +112,7 @@ const Filter = () => {
             />
             <Accordion
               category="Hobbies"
-              list={optionsInfo.hobbies!}
+              optionsKey="hobbies"
               accordionData={prefHobbies}
               setAccordionData={setPrefHobbies}
               openingAccordion={openingAccordionCategory}
@@ -218,6 +135,12 @@ const styles = StyleSheet.create({
   accordionBody: {
     width: "100%",
     paddingHorizontal: 20,
+  },
+  accordionBodyItemContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: ITEM_HEIGHT,
   },
   accordionContainer: {
     width: "100%",
@@ -242,11 +165,5 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     marginHorizontal: 16,
-  },
-  accordionBodyItemContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    height: ITEM_HEIGHT,
   },
 });

@@ -17,6 +17,16 @@ export type RootStackParamList = {
     prefHobbies: string[];
     type: string;
   };
+  Profile: {
+    newUserInfo?: UserInfo;
+  };
+  ProfileEdit: {
+    majors: string[];
+    greek: string[];
+    programs: string[];
+    hobbies: string[];
+    bio: string;
+  };
 };
 
 export interface ConversationInterface {

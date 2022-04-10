@@ -4,11 +4,10 @@ import "react-native-reanimated";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import auth from "@react-native-firebase/auth";
 import { AuthContext } from "./contexts/AuthContext";
 import { SocketContext } from "./contexts/SocketContext";
-import { getAllConversations, getOptionsInfo, getProfile, postAuthInfo } from "./utils";
+import { getAllConversations, getOptionsInfo, getProfile, getStorage, postAuthInfo, setStorage } from "./utils";
 import { ConversationInterface, RootStackParamList } from "./utils/interfaces";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -19,6 +18,7 @@ import Filter from "./screens/Filter";
 import Conversations from "./screens/Conversations";
 import Chat from "./screens/Chat";
 import Profile from "./screens/Profile";
+import ProfileEdit from "./screens/ProfileEdit";
 import Login from "./screens/Login";
 import Loading from "./screens/Loading";
 
@@ -37,17 +37,6 @@ const HomeNavigation = () => {
   return (
     <Stack.Navigator
       screenOptions={({ route }) => ({
-        headerTitle: () => (
-          <Text
-            style={{
-              fontWeight: "bold",
-              fontSize: 16,
-              textTransform: "uppercase",
-              color: mainColor,
-            }}>
-            {route.name}
-          </Text>
-        ),
         headerTitleAlign: "center",
         headerStyle: {
           backgroundColor: darkColor,
@@ -62,22 +51,29 @@ const HomeNavigation = () => {
   );
 };
 
+const ProfileNavigation = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={({ route }) => ({
+        headerTitleAlign: "center",
+        headerStyle: {
+          backgroundColor: darkColor,
+        },
+        headerBackTitleVisible: false,
+        headerTintColor: mainColor,
+        headerShadowVisible: false,
+      })}>
+      <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
+    </Stack.Navigator>
+  );
+};
+
 const TabNavigation = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: true,
-        headerTitle: () => (
-          <Text
-            style={{
-              fontWeight: "bold",
-              fontSize: 16,
-              textTransform: "uppercase",
-              color: mainColor,
-            }}>
-            {route.name}
-          </Text>
-        ),
         headerShadowVisible: false,
         headerTitleAlign: "center",
         headerStyle: {
@@ -98,7 +94,7 @@ const TabNavigation = () => {
               return (
                 <MaterialIcons name="messenger-outline" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />
               );
-            case "Profile":
+            case "ProfileNavigation":
               return <AntDesign name="user" size={25} color={`${focused ? "#e4bb4a" : "#fffbf57f"}`} />;
           }
         },
@@ -108,7 +104,11 @@ const TabNavigation = () => {
       })}>
       <Tab.Screen name="HomeNavigation" component={HomeNavigation} options={{ headerShown: false, title: "Home" }} />
       <Tab.Screen name="Conversations" component={Conversations} />
-      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen
+        name="ProfileNavigation"
+        component={ProfileNavigation}
+        options={{ headerShown: false, title: "Profile" }}
+      />
     </Tab.Navigator>
   );
 };
@@ -121,17 +121,14 @@ const App = () => {
   useEffect(() => {
     // get user login status
     (async () => {
-      let value = await AsyncStorage.getItem("uid");
-      if (value) {
-        value = JSON.parse(value);
-        if (!value) setLoggedIn(false);
-      }
+      let value = await getStorage("uid");
+      if (!value) setLoggedIn(false);
     })();
 
     // firebase auth
     return auth().onAuthStateChanged(async user => {
       if (user) {
-        await AsyncStorage.setItem("uid", JSON.stringify(user.uid));
+        await setStorage("uid", user.uid);
         setConversations!(
           (await getAllConversations()).sort((prev: ConversationInterface, next: ConversationInterface) => {
             return next.timestamp - prev.timestamp;
@@ -150,7 +147,9 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(userInfo) && socketConnected) setLoggedIn(true);
+    // Check if userInfo exists & socketConnected equals true
+    // If so, user if logged in
+    if (Object.keys(userInfo).length && socketConnected) setLoggedIn(true);
   }, [userInfo, socketConnected]);
 
   if (loggedIn === null) return <Loading />;
@@ -158,7 +157,7 @@ const App = () => {
 
   return (
     <NavigationContainer theme={Theme}>
-      <StatusBar barStyle={"light-content"} />
+      <StatusBar barStyle="light-content" />
       <Stack.Navigator>
         <Stack.Screen name="TabNavigation" component={TabNavigation} options={{ headerShown: false }} />
         <Stack.Screen name="Chat" component={Chat} />

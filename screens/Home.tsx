@@ -11,6 +11,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Modal, Portal, TextInput } from "react-native-paper";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import HeaderTitle from "../components/HeaderTitle";
 
 interface ProfileCardProps {
   user: UserInfo;
@@ -98,6 +99,8 @@ const Home = () => {
     (async () => {
       await refreshMatchingProfiles();
     })();
+
+    navigation.setOptions({ headerTitle: () => <HeaderTitle name="Home" /> });
   }, []);
 
   useEffect(() => {
