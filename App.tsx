@@ -5,6 +5,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import auth from "@react-native-firebase/auth";
+import messaging from "@react-native-firebase/messaging";
+import notifee, { EventType } from "@notifee/react-native";
 import { AuthContext } from "./contexts/AuthContext";
 import { SocketContext } from "./contexts/SocketContext";
 import { getAllConversations, getOptionsInfo, getProfile, getStorage, postAuthInfo, setStorage } from "./utils";
@@ -36,7 +38,7 @@ const Theme = {
 const HomeNavigation = () => {
   return (
     <Stack.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={() => ({
         headerTitleAlign: "center",
         headerStyle: {
           backgroundColor: darkColor,
@@ -54,7 +56,7 @@ const HomeNavigation = () => {
 const ProfileNavigation = () => {
   return (
     <Stack.Navigator
-      screenOptions={({ route }) => ({
+      screenOptions={() => ({
         headerTitleAlign: "center",
         headerStyle: {
           backgroundColor: darkColor,
@@ -73,7 +75,6 @@ const TabNavigation = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: true,
         headerShadowVisible: false,
         headerTitleAlign: "center",
         headerStyle: {
@@ -119,10 +120,25 @@ const App = () => {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // get user login status
     (async () => {
+      // for iOS only: get notification permission
+      await notifee.requestPermission();
+
+      // get user login status
       let value = await getStorage("uid");
       if (!value) setLoggedIn(false);
+
+      // FCM: register remote message
+      if (!messaging().isDeviceRegisteredForRemoteMessages) await messaging().registerDeviceForRemoteMessages();
+      console.log("[FCM Token]", await messaging().getToken());
+
+      const initialNotification = await notifee.getInitialNotification();
+
+      console.log(initialNotification);
+      if (initialNotification) {
+        console.log("Notification caused application to open", initialNotification.notification);
+        console.log("Press action used to open the app", initialNotification.pressAction);
+      }
     })();
 
     // firebase auth
@@ -142,6 +158,20 @@ const App = () => {
         setLoggedIn(false);
         setUserInfo!({});
         setOptionsInfo!({});
+      }
+    });
+  }, []);
+
+  // Notifee: subscribe to foreground events
+  useEffect(() => {
+    return notifee.onForegroundEvent(({ type, detail }) => {
+      switch (type) {
+        case EventType.DISMISSED:
+          console.log("[Foreground Event] User dismissed notification", detail.notification);
+          break;
+        case EventType.PRESS:
+          console.log("[Foreground Event] User pressed notification", detail.notification);
+          break;
       }
     });
   }, []);

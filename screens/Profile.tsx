@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useLayoutEffect } from "react";
 import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { DefaultStyles } from "../App";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -28,12 +28,13 @@ const Separator = () => {
   return <View style={styles.separator} />;
 };
 
-const NewProfile = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "ProfileEdit">>();
+const Profile = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, "Profile">>();
   const route = useRoute<RouteProp<RootStackParamList, "Profile">>();
+
   const { userInfo, setUserInfo } = useContext(AuthContext);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({ headerTitle: () => <HeaderTitle name="Profile" /> });
   }, []);
 
@@ -99,7 +100,7 @@ const NewProfile = () => {
   );
 };
 
-export default NewProfile;
+export default Profile;
 
 const { width } = Dimensions.get("window");
 const PHOTO_SIZE = width / 4;

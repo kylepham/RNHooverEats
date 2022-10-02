@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useLayoutEffect, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
@@ -34,11 +34,11 @@ const ProfileEdit = () => {
     navigation.navigate("Profile", { newUserInfo });
   }, [majors, greek, programs, hobbies, bio]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({ headerTitle: () => <HeaderTitle name="Edit" /> });
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity activeOpacity={0.8} onPress={onApplyPress}>

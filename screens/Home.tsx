@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useLayoutEffect, useState } from "react";
 import { FlatList, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import notifee from "@notifee/react-native";
 import { AuthContext } from "../contexts/AuthContext";
 import { SocketContext } from "../contexts/SocketContext";
 import { DefaultStyles } from "../App";
-import { CustomText, mainColor } from "../utils/components";
+import { CustomButton, CustomText, darkColor, mainColor } from "../utils/components";
 import { postFilterGetMatching } from "../utils";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { RootStackParamList, UserInfo } from "../utils/interfaces";
@@ -99,8 +100,12 @@ const Home = () => {
     (async () => {
       await refreshMatchingProfiles();
     })();
+  }, []);
 
-    navigation.setOptions({ headerTitle: () => <HeaderTitle name="Home" /> });
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => <HeaderTitle name="Home" />,
+    });
   }, []);
 
   useEffect(() => {
@@ -128,10 +133,30 @@ const Home = () => {
     }
   }, [route.params]);
 
+  const displayNotification = async () => {
+    // Create a channel
+    const channelId = await notifee.createChannel({
+      id: "default",
+      name: "Default Channel",
+    });
+
+    // Display a notification
+    await notifee.displayNotification({
+      title: "Notification Title",
+      body: "Main body content of the notification",
+      android: {
+        channelId,
+      },
+    });
+  };
+
   return (
     <SafeAreaView style={[DefaultStyles.Container, { flex: 1 }]}>
       <View style={[DefaultStyles.Container, styles.container]}>
         <View style={styles.userTypeContainer}>
+          <CustomButton onPress={displayNotification}>
+            <Text>Notifee</Text>
+          </CustomButton>
           <CustomText>You are</CustomText>
           <TouchableOpacity
             activeOpacity={0.8}

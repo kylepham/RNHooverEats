@@ -2,6 +2,7 @@ import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import notifee from "@notifee/react-native";
 import { UserInfo } from "./interfaces";
 
 const baseURL = "https://twiki.csc.depauw.edu/api";
@@ -157,4 +158,25 @@ export const setStorage = async (key: string, value: any) => {
   try {
     await AsyncStorage.setItem(key, JSON.stringify(value));
   } catch (e) {}
+};
+
+export const onRemoteMessageReceived = async (message: any) => {
+  // idk
+  console.log("[utils/onRemoteMessageReceived]", message);
+  const { notification } = message;
+  const channelId = await notifee.createChannel({
+    id: "default",
+    name: "Default Channel",
+  });
+
+  // Display a notification
+  await notifee.displayNotification({
+    title: notification.title,
+    body: notification.body,
+    android: {
+      channelId,
+      showTimestamp: true,
+      timestamp: new Date(message.sentTime).getTime(),
+    },
+  });
 };

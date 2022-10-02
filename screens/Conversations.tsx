@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useLayoutEffect } from "react";
 import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SocketContext } from "../contexts/SocketContext";
 import { DefaultStyles } from "../App";
@@ -76,7 +76,7 @@ const Conversations = () => {
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({ headerTitle: () => <HeaderTitle name="Conversations" /> });
   }, []);
 

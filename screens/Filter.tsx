@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useLayoutEffect, useState } from "react";
 import { Dimensions, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AuthContext } from "../contexts/AuthContext";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
@@ -35,11 +35,11 @@ const Filter = () => {
     navigation.navigate("Home", { newUserInfo });
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({ headerTitle: () => <HeaderTitle name="Filter" /> });
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TouchableOpacity activeOpacity={0.8} onPress={onApplyPress}>

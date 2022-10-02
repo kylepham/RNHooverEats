@@ -7,9 +7,21 @@ import Root from "./Root";
 import { name as appName } from "./app.json";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import * as encoding from "text-encoding";
+import notifee from "@notifee/react-native";
+import messaging from "@react-native-firebase/messaging";
+import { onRemoteMessageReceived } from "./utils";
 
 GoogleSignin.configure({
   webClientId: "26063172720-rdr53at36ngq7q66n01p24n8f1e6k29a.apps.googleusercontent.com",
 });
+
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  const { notification, pressAction } = detail;
+
+  console.log("[Background Event]", "Notification: ", notification, "Press Action: ", pressAction);
+});
+
+messaging().onMessage(onRemoteMessageReceived);
+messaging().setBackgroundMessageHandler(onRemoteMessageReceived);
 
 AppRegistry.registerComponent(appName, () => Root);
